@@ -1,0 +1,20 @@
+.sprite{
+	border:1px solid red;
+	width:60px;
+	height:60px;
+	display:inline-block;
+	background:green;
+	position: relative;
+	left:0;
+	top:0;
+
+}
+.drag-bar{
+	background:red;
+	font-weight:bold;
+	font-size:16px;
+	text-align:center;
+	color:#ffffff;
+	width:20px;
+	height:20px;
+}

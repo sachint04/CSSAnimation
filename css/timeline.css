@@ -1,0 +1,62 @@
+.timlineview{
+	overflow-x: auto;
+	width : 100%;
+	height:45px;
+	background-color:#cccccc;
+}
+.frame{
+	border-right:1px solid rgb(150,150,150);
+	border-bottom:1px solid rgb(150,150,150);
+	border-top:1px solid rgb(150,150,150);
+}
+.frame.selected{
+	background-color:#000000;
+}
+.frame.key {
+    background-color: red;
+}
+.frame.selected.key {
+	border-width: 2px;
+}
+.frame .btn-frame{
+	width:5px;
+	height:10px;
+	color:rgba(0,0,0,0);
+}
+.timeline-cntrl {
+    width: 180px;
+    text-align: center;
+    margin: 0 auto;
+}
+.timeline-cntrl span {
+    display: table-cell;
+    vertical-align: middle;
+}
+.timeline-cntrl a {
+    border: 1px solid;
+    margin-right: 0px;
+    min-width: 30px;
+    display: inline-block;
+    background-color: gray;
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+}
+.timeline-cntrl a:hover {
+    background-color: darkgray;
+}
+.effects {
+    /* float: right; */
+    border: 1px solid;
+    height: 500px;
+    display: inline-block;
+    padding: 10px;
+}
+.stage {
+    width: 1220px;
+    border: 1px solid;
+    display: inline-block;
+    height: 497px;
+    float: right;
+    position:relative;
+}
