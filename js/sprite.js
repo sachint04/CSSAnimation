@@ -6,26 +6,29 @@ define([
 		"touch"
 		],
 	function($, EventDispatcher, jqueryui, punch, touch){
-		var offset,$view,$container;
+	
+		
 		var sprite = function(p_view, p_container){
 			  EventDispatcher.call(this);
-			$view 			= p_view;
-			$container		= p_container;
-			offset 			= $view.offset();
-			offset.width 	= $view.width();
-			offset.height 	= $view.height();
-			createScaleBar.call(this, offset, 'scalebar', $view, $container);
-			moveScaleBar.call(this, offset, 'headermove', $view,$container );
-			
-
+			this.$view 			= p_view;
+			this.$container		= p_container;
+			this.offset 		= this.$view.offset();
+			this.offset.width 	= this.$view.width();
+			this.offset.height 	= this.$view.height();
+			createScaleBar.call(this, this.offset, 'scalebar', this.$view, this.$container);
+			moveScaleBar.call(this, this.offset, 'headermove', this.$view, this.$container );
 			return this;
-		}
+		};
 
 	sprite.prototype										= Object.create(EventDispatcher.prototype);
 	sprite.prototype.constructor							= sprite;
 	
 	sprite.prototype.updateCSS							= function(css){
-		$view.css(css);
+		this.$view.css(css);
+	};
+	
+	sprite.prototype.init 		= function(){
+			onDragStop.call(this, this.$view);		
 	};
 	
 	function createScaleBar(offset, id, view, $container){
@@ -36,7 +39,8 @@ define([
 			'top': (offset.height - (bar.height()/2))+'px'
 		}).html('1');
 		view.append(bar);
-		setDrag.call(this, bar, onDrag.bind(this), onStart.bind(this));
+		setDrag.call(this, bar, onDrag.bind(this));
+	
 		return bar;
 	}
 
@@ -51,8 +55,7 @@ define([
 			'top': (-(bar.height()/2))+'px'
 		}).html('0');
 		view.parent().append(bar);
-		setDrag.call(this, bar, onDrag1.bind(this), onStart1.bind(this)  );
-		
+		setDrag.call(this, bar, onDrag1.bind(this) );
 		
 		return bar;
 		
@@ -82,20 +85,14 @@ define([
 	
 	
 	}
-	function onStart1(e){
-		
-	}
+
 	function onDrag1(e){
 		$target = $(e.target),
 		$elem 	= $('#'+$target.attr('data-target')),
-		$scalebar = $elem.find('#scalebar')
+		$scalebar = $elem.find('#scalebar');
+		
 		$elem.css({'top':$target.position().top+'px'});
 		$elem.css({'left':$target.position().left+'px'});
-		
-		
-		
-	
-		
 	//	console.log($target.attr('data-target')+' | '+$target.offset().top+' | '+$target.offset().left);
 	}
 	function onDragStart(e){
@@ -103,12 +100,54 @@ define([
 	}
 	function onDragStop(e){
 		this.dispatchEvent('ondrag',{type:'ondrag', target:this, css:{
-						"left":$elem.css('left'), 
-						"top":$elem.css('top'), 
-						"width":$elem.css('width'), 
-						"height":$elem.css('height')
+						"left":this.$view.css('left'), 
+						"top":this.$view.css('top'), 
+						"width":this.$view.css('width'), 
+						"height":this.$view.css('height')
 						}});
-	}
+	};
+	
+	sprite.prototype.showControls  = function(show){
+		var movebar 	= $("#headermove2"),
+		scalebar 		= $("#scalebar");
+		if(show){
+			movebar.removeClass('hide');
+			scalebar.removeClass('hide');
+		}else{
+			movebar.addClass('hide');
+			scalebar.addClass('hide');
+		}
+	};
+	
+	sprite.prototype.invalidate  = function(){
+		onDragStop.call(this);
+	};
+	sprite.prototype.invalidateControls  = function(){
+		var bar 		= $("#headermove2"),w,h,l,t,width,height, pos;
+		pos			= this.$view.position();
+		l 				= pos.left;
+		t 				= pos.top;
+		width			= bar.width();
+		height			= bar.height();
+		
+		bar.css({
+			'position':'absolute',
+			'left': (l -(width/2))+'px',
+			'top': 	(t -(height/2))+'px'
+		});
+		
+		bar 		= $("#scalebar");
+		w 			= bar.width();
+		h 			= bar.height();
+		width 		= this.$view.width();
+		height 		= this.$view.height();
+		 
+		bar.css({
+			'position':'absolute',
+			'left':(width 	- (w/2))+'px',
+			'top': (height 	- (h/2))+'px'
+		});
+	};
 	
 	function setDrag(bar, dragFun){
 		bar.draggable({
@@ -116,9 +155,9 @@ define([
 			stop:onDragStop.bind(this),
 			cursor:'move',
 			drag:dragFun
-		})
+		});
 		
-	}
+	};
 
 	return sprite;
 

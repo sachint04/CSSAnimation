@@ -52,7 +52,7 @@ define([
 		function($, Timeline, sprite){
 			var timeline = new Timeline($(".timlineview")); 
 			var obj = {
-				timesec: 10,
+				timesec: 8,
 				fps: 25,
 				currentframe:1
 			}

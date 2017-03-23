@@ -17,18 +17,18 @@ define([
 	timeline.prototype										= Object.create(EventDispatcher.prototype);
 	timeline.prototype.constructor							= timeline;
 	
-	timeline.prototype.init = function(oJson, p_sprite){
-		var oScope = this;
-		sprite = p_sprite;
+	timeline.prototype.init = function(timeline, p_sprite, oJson){
+		var oScope 		= this;
+		sprite 			= p_sprite;
 		time 			=	oJson.timesec || 30;
 		fps				= 	oJson.fps || 25;
-		currentframe	=	oJson.currentframe || 1
+		currentframe	=	oJson.currentframe || 1;
 		createtimeline.call(this);	
 		
 		effect = oEffect;
 		this.setCurrentFrame(currentframe);
 		
-		sprite.addEventListener('ondrag', onDrag.bind(this))
+		sprite.addEventListener('ondrag', onDrag.bind(this));
 		
 		$('.timeline-cntrl a' ).click(function(e){
 			oScope.handleEvent.call(oScope, e);
@@ -38,7 +38,10 @@ define([
 			var sEffect = $(e.currectTarget).attr('id'); 
 			oScope.addEffect.call(this, sEffect);
 		});
+		
 		this.setKeyFrame(1);
+		sprite.init();
+
 	};
 	
 	timeline.prototype.setCurrentFrame 		= function(p_nframe){
@@ -50,18 +53,20 @@ define([
 		curFrame.addClass('selected');
 		$('#frame_cnt').text(currentframe);
 		
-		// if(oEffect){
-			// var lastFrame 	= this.getLastKeyFrame(currentframe),
-			// key				= oEffect.key[oEffect[lastFrame]];
-// 			
-			// sprite.updateCSS( key.css);			
-		// }
+		if(oEffect){
+			var lastFrame 	= this.getLastKeyFrame(currentframe),
+			key				= oEffect.key[oEffect[currentframe]];
+			if(key){
+				sprite.updateCSS( key.css);
+				sprite.invalidateControls.call(sprite);					
+			}
+		}
 	};
 	
 	timeline.prototype.getLastKeyFrame 		= function(p_nframe){
 		var i = 1;
 		$('.frame.item.key').each(function(index, elem){
-			if(i > p_nframe){
+			if(i > Number(p_nframe)){
 				return false;
 			}
 			i 	= $(elem).attr('id').split('_')[1];
@@ -84,7 +89,8 @@ define([
 		if(!$curFrame.hasClass('key')){
 			$curFrame.addClass('key');					
 		}else{
-			$curFrame.removeClass('key');								
+			$curFrame.removeClass('key');
+			sprite.invalidate();								
 		}
 	};
 	
@@ -109,6 +115,7 @@ define([
 			oScope.setCurrentFrame(curfrm + 1);
 		}.bind(oScope), Math.ceil(1000/fps));
 		
+		sprite.showControls(false);
 		createAnimation.call(this);
 	};
 	
@@ -116,7 +123,9 @@ define([
 		if(playInterval){
 			clearInterval(playInterval);
 			playInterval = null;
-		}
+		};
+		sprite.showControls(true);
+		sprite.invalidateControls(true);
 		clearAnimation.call(this);
 	};
 	
@@ -134,6 +143,12 @@ define([
 				break;
 			case "btn_key" :
 				oScope.setKeyFrame(oScope.getCurrentFrame());
+				break;
+			case "btn_prev" :
+				oScope.setCurrentFrame(1);
+				break;
+			case "btn_next" :
+				oScope.setCurrentFrame(time * fps);
 				break;
 		};
 	};
@@ -172,8 +187,8 @@ define([
 		if(key.length){
 			key.sort(function(a, b){
 				return a.frame - b.frame;
-			})
-		}
+			});
+		};
 		var totalF		= key[key.length - 1].frame;
 		
 		if(totalF){
@@ -192,8 +207,8 @@ define([
 			 style		= style + '}';
 			
 			$('.anim-style').empty().append('<style>'+s+' '+style+'</style>');	
-			console.log(style);
-			console.log(s);
+		//	console.log(style);
+		//	console.log(s);
 		}
 	};
 	
