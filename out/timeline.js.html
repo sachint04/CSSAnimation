@@ -1,17 +1,43 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: timeline.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: timeline.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * A module represents Timeline and flash like Play/Pause controls.
  * @module js/timeline  
  */
 define([
 		"jquery",
-		"EventDispatcher",
-		"sprite",
-		"moveBar"
+		"EventDispatcher"
 		],
-	function($, EventDispatcher,Sprite, moveBar){
+	function($, EventDispatcher){
 	var 	time 			= 10,
 			fps				= 20, 
-			currentframe 	= 1, playInterval, aSprites, currentSprite, $playhead,$frame, $view,oEffect,$stage;
+			currentframe 	= 1, playInterval, sprite, $playhead,$frame, $view,oEffect;
 
 		/**
 		 * 
@@ -38,18 +64,18 @@ define([
 	 * @param {Object} p_sprite sprite controller object
 	 * @param {JSON} oJson timeline configuration
 	 */
-	timeline.prototype.init = function(timeline,  oJson){
+	timeline.prototype.init = function(timeline, p_sprite, oJson){
 		var oScope 		= this;
-		aSprites 		= [];
+		sprite 			= p_sprite;
 		time 			=	oJson.timesec || 30;
 		fps				= 	oJson.fps || 25;
 		currentframe	=	oJson.currentframe || 1;
 		createtimeline.call(this);	
-		$stage 			= $('.stage');
 		
 		effect = oEffect;
 		this.setCurrentFrame(currentframe);
 		
+		sprite.addEventListener('ondrag', onDrag.bind(this));
 		
 		$('.timeline-cntrl a' ).click(function(e){
 			oScope.handleEvent.call(oScope, e);
@@ -59,24 +85,10 @@ define([
 			var sEffect = $(e.currectTarget).attr('id'); 
 			oScope.addEffect.call(this, sEffect);
 		});
-		moveBar.addEventListener('drag_progress', dragProgress.bind(this));
-		checkSprite.call(this);
+		
 		this.setKeyFrame(1);
-	};
-	
-	function checkSprite(){
-		var oScope 		= this;
-		var oSprite 	= Sprite;
-		var $sprite 	= $('.sprite');
-		var arr			= aSprites;
-		$sprite.each(function(index, elem){
-			var $elem 		= $(elem);
-			var sprite 		= new oSprite($elem, $stage);
-			sprite.addEventListener('sprite_click', onSpriteClick.bind(oScope));
-			sprite.addEventListener('ondrag', onDrag.bind(oScope));
-			sprite.init();
-			aSprites.push(sprite);
-		});
+		sprite.init();
+
 	};
 	
 	/**
@@ -85,7 +97,7 @@ define([
 	 */
 	timeline.prototype.setCurrentFrame 		= function(p_nframe){
 		//current frame is valid 
-		if(p_nframe <= (time * fps)){
+		if(p_nframe &lt;= (time * fps)){
 			currentframe = p_nframe;	
 		}
 		// set selected state
@@ -179,10 +191,8 @@ define([
 			clearInterval(playInterval);
 			playInterval = null;
 		};
-		if(this.currentSprite){
-			this.currentSprite.showControls(true);
-			this.currentSprite.invalidateControls(true);
-		}
+		sprite.showControls(true);
+		sprite.invalidateControls(true);
 		clearAnimation.call(this);
 	};
 	
@@ -225,7 +235,6 @@ define([
 		if(bKey){
 			updateCSS.call(this,obj);
 		}
-		moveBar.setTarget(obj.$view)
 	};
 	
 	/**
@@ -267,7 +276,7 @@ define([
 		if(totalF){
 			var s = '.sprite{animation-name: anim;animation-duration: '+Math.ceil(totalF /fps) +'s;}'
 			var style = '@keyframes anim {';
-			for (var i=0; i < key.length; i++) {
+			for (var i=0; i &lt; key.length; i++) {
 			  var frame = key[i].frame,
 			  css		= key[i].css,
 			  per		= Math.round((frame/totalF)* 100);
@@ -279,7 +288,7 @@ define([
 			};
 			 style		= style + '}';
 			
-			$('.anim-style').empty().append('<style>'+s+' '+style+'</style>');	
+			$('.anim-style').empty().append('&lt;style>'+s+' '+style+'&lt;/style>');	
 		//	console.log(style);
 		//	console.log(s);
 		}
@@ -298,13 +307,13 @@ define([
 	function createtimeline(){
 		if(time){
 			var oScope = this,
-			$frametemplate 	= $('<span class="frame hide"><a href="#" class="btn-frame">f</a></span>');
+			$frametemplate 	= $('&lt;span class="frame hide">&lt;a href="#" class="btn-frame">f&lt;/a>&lt;/span>');
 			
 			$view.empty();
-			$playhead 	= $('<div class"play-head"></div>');
+			$playhead 	= $('&lt;div class"play-head">&lt;/div>');
 			var frames = time * fps;
 			
-			for (var i=1; i <= frames; i++) {
+			for (var i=1; i &lt;= frames; i++) {
 				var $f 	= $frametemplate.clone().removeClass('hide').addClass('item');
 				$f.attr({
 					"id":'f_'+i,
@@ -321,26 +330,32 @@ define([
 		}
 	};
 	
-	function getCurrentSpriteByView(elem){
-		for(var i = 0; i <aSprites.length;i++){
-			if(aSprites[i].$view[0] === elem){
-				return aSprites[i];
-			}
-		};
-	};
-	function onSpriteClick(e){
-		this.currentSprite = getCurrentSpriteByView.call(this, e.target)
-		moveBar.setTarget(e.view);
-		var offset = e.view.offset();
-	};
+	
 
-	function dragProgress(e){
-		console.log(JSON.stringify(e.offset));
-		if(this.currentSprite){
-			this.currentSprite.$view.offset(e.offset)
-		}
-	};
 	return timeline;
 
 });
 
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-js_sprite.html">js/sprite</a></li><li><a href="module-js_timeline.html">js/timeline</a></li></ul><h3>Classes</h3><ul><li><a href="module-sprite.html">sprite</a></li><li><a href="module-timeline.html">timeline</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Mar 30 2017 15:54:58 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

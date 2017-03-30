@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: sprite.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: sprite.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * A module represents controller for the sprite element on the stage.
+ * @module js/sprite  
+ */
+define([
+		"jquery",
+		"EventDispatcher",
+		"jqueryui",
+		"punch",
+		"touch"
+		],
+		
+	function($, EventDispatcher, jqueryui, punch, touch){
+		
+		/**
+ 		* Editable Sprite Controller
+ 		* @constructor
+ 		* @alias module:sprite
+		*/
+		var sprite = function(p_view, p_container){
+			EventDispatcher.call(this);
+			/** The class '$view' property - jQuery element */
+			this.$view 			= p_view;
+			/** The class '$conainer' property - jQuery element */
+			this.$container		= p_container;
+			/** The class 'offset' property - object */
+			this.offset 		= this.$view.offset();
+			this.offset.width 	= this.$view.width();
+			this.offset.height 	= this.$view.height();
+			createScaleBar.call(this, this.offset, 'scalebar', this.$view, this.$container);
+			moveScaleBar.call(this, this.offset, 'headermove', this.$view, this.$container );
+			return this;
+		};
+
+	sprite.prototype										= Object.create(EventDispatcher.prototype);
+	sprite.prototype.constructor							= sprite;
+	
+	/**
+	 *Apply CSSS to view 
+ 	* @param {Object} css Style props
+	 */	
+	sprite.prototype.updateCSS							= function(css){
+		this.$view.css(css);
+	};
+	
+	sprite.prototype.init 		= function(){
+			onDragStop.call(this, this.$view);		
+	};
+	
+	/** 
+	 *draw Scale bar handle 
+	 * @param {Object} offset
+	 * @param {String} id
+	 * @param {jQuery} view
+	 * @param {jQuery} $container
+	 */
+	function createScaleBar(offset, id, view, $container){
+		var bar =  $('&lt;div id="'+id+'" class="drag-bar">&lt;/div>');
+		bar.css({
+			'position':'absolute',
+			'left':(offset.width - (bar.width()/2))+'px',
+			'top': (offset.height - (bar.height()/2))+'px'
+		}).html('1');
+		view.append(bar);
+		setDrag.call(this, bar, onDragMove.bind(this));
+	
+		return bar;
+	}
+	
+	/**
+	 * Draw Offset handle
+ * @param {Object} offset
+ * @param {String} id
+ * @param {jQuery} view
+	 */
+	function moveScaleBar(offset, id, view){
+		var parentId 	= view.attr("id");
+		var left 		= (view.css('position') === "absolute") ? 'left' : 'margin-left';
+		var top 		= (view.css('position') === "absolute") ? 'top' : 'margin-top';
+		var bar 		=  $('&lt;div id="'+id+'2" class="drag-bar" data-target="'+parentId+'">&lt;/div>');
+		bar.css({
+			'position':'absolute',
+			'left':(-(bar.width()/2))+'px',
+			'top': (-(bar.height()/2))+'px'
+		}).html('0');
+		view.append(bar);
+		setDrag.call(this, bar, onDragScale.bind(this) );
+		
+		return bar;
+		
+	}
+	
+	/**
+	 * Initiate JQueryUI lib on offset and scale handles 
+ * @param {Object} bar
+ * @param {Object} dragFun
+	 */
+	function setDrag(bar, dragFun){
+		bar.draggable({
+			start:onDragStart.bind(this),
+			stop:onDragStop.bind(this),
+			cursor:'move',
+			drag:dragFun
+		});
+		
+	};
+	
+	/**
+	 * Private: Drag handler for Offset handler 
+	 */
+	function onDragMove(e){
+		$target = $(e.target),
+		$elem 	= $target.parent(),
+		offset1	= $target.offset(),
+		offset2	= $elem.offset();
+		
+		$elem.width(offset1.left - offset2.left  );
+		$elem.height(offset1.top - offset2.top );
+		
+		// $target.css({
+			// 'left':offset2.left + (offset2.width - ($target.width()/2))+'px',
+			// 'top': offset2.top + (offset2.height - ($target.height()/2))+'px'
+		// });
+
+		$target.css({
+			'left':offset2.left + (offset2.width - ($target.width()/2))+'px',
+			'top': offset2.top + (offset2.height - ($target.height()/2))+'px'
+		});
+	
+	
+	}
+
+	/**
+	 * Private: Drag handler for Scale handler 
+	 */
+	function onDragScale(e){
+		$target = $(e.target),
+		$elem 	= $('#'+$target.attr('data-target')),
+		$scalebar = $elem.find('#scalebar');
+		
+		$elem.css({'top':$target.position().top+'px'});
+		$elem.css({'left':$target.position().left+'px'});
+	//	console.log($target.attr('data-target')+' | '+$target.offset().top+' | '+$target.offset().left);
+	}
+	
+	/**
+	 * Private: jQueryUI drag start handler 
+ 	* @param {Object} e Drag data
+	 */
+	function onDragStart(e){
+	//	console.log('onDragStart'+e);
+	}
+	
+	/**
+	 * Private: jQueryUI drag stop handler 
+	 * @param {Object} e Drag data
+	 */
+	function onDragStop(e){
+		this.dispatchEvent('ondrag',{type:'ondrag', target:this, css:{
+						"left":this.$view.css('left'), 
+						"top":this.$view.css('top'), 
+						"width":this.$view.css('width'), 
+						"height":this.$view.css('height')
+						}});
+	};
+	
+	/**
+	 * 
+ 	* @param {Object} e
+	 */
+	function onStart(e){
+		$target = $(e.target),
+		$elem 	= $target.parent();
+		$target.css({
+			'left':$elem.offset().left + ($elem.offset().width - ($target.width()/2))+'px',
+			'top': $elem.offset().top + ($elem.offset().height - ($target.height()/2))+'px'
+		});
+	
+	}
+	
+	/**
+	 *	Show Hide tranform handlers 
+ * @param {Boolean} show
+	 */
+	sprite.prototype.showControls  = function(show){
+		var movebar 	= $("#headermove2"),
+		scalebar 		= $("#scalebar");
+		if(show){
+			movebar.removeClass('hide');
+			scalebar.removeClass('hide');
+		}else{
+			movebar.addClass('hide');
+			scalebar.addClass('hide');
+		}
+	};
+	
+	/**
+	 * Refresh transform handlers 
+	 */
+	sprite.prototype.invalidate  = function(){
+		onDragStop.call(this);
+	};
+	
+	/**
+	 * Refresh transform handlers 
+	 */
+	sprite.prototype.invalidateControls  = function(){
+		var bar 		= $("#headermove2"),w,h,l,t,width,height, pos;
+		pos			= this.$view.position();
+		l 				= pos.left;
+		t 				= pos.top;
+		width			= bar.width();
+		height			= bar.height();
+		
+		bar.css({
+			'position':'absolute',
+			'left': (l -(width/2))+'px',
+			'top': 	(t -(height/2))+'px'
+		});
+		
+		bar 		= $("#scalebar");
+		w 			= bar.width();
+		h 			= bar.height();
+		width 		= this.$view.width();
+		height 		= this.$view.height();
+		 
+		bar.css({
+			'position':'absolute',
+			'left':(width 	- (w/2))+'px',
+			'top': (height 	- (h/2))+'px'
+		});
+	};
+	
+
+
+	return sprite;
+
+
+
+	}
+);</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-js_sprite.html">js/sprite</a></li><li><a href="module-js_timeline.html">js/timeline</a></li></ul><h3>Classes</h3><ul><li><a href="module-sprite.html">sprite</a></li><li><a href="module-timeline.html">timeline</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Mar 30 2017 15:54:58 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

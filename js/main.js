@@ -47,17 +47,19 @@ if (typeof Object.create !== 'function') {
 define([
 		"jquery",
 		"timeline",
-		"sprite"
+		"sprite",
+		"moveBar"
 		],
-		function($, Timeline, sprite){
+		function($, Timeline, sprite, moveBar){
 			var timeline = new Timeline($(".timlineview")); 
 			var obj = {
 				timesec: 8,
 				fps: 25,
 				currentframe:1
 			}
-			var sprite 		= new sprite($('.sprite'))
-			timeline.init(timeline, sprite, obj);
+			
+			timeline.init(timeline, obj);
+			moveBar.init($('.stage'))
 			//timeline.play();
 				
 			
