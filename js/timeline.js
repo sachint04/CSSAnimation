@@ -6,10 +6,10 @@ define([
 		"jquery",
 		"EventDispatcher",
 		"sprite",
-		"moveBar",
 		'responsiveGrid',
+		'stage'
 		],
-	function($, EventDispatcher,Sprite, moveBar, responsiveGrid){
+	function($, EventDispatcher,Sprite, responsiveGrid, stage){
 	var 	time 			= 10,
 			fps				= 20, 
 			currentframe 	= 1, playInterval, aSprites, currentSprite, $playhead,$frame, $view,oEffect,$stage;
@@ -51,6 +51,12 @@ define([
 		effect = oEffect;
 		this.setCurrentFrame(currentframe);
 		
+		var oScope = this;
+		
+		this.stage 	= new stage($stage);
+		this.stage.addEventListener('style_change', function(event){
+			oScope.grid.refresh(event.stage);
+		});
 		
 		$('.timeline-cntrl a' ).click(function(e){
 			oScope.handleEvent.call(oScope, e);
@@ -62,14 +68,13 @@ define([
 		});
 		//moveBar.addEventListener('drag_progress', dragProgress.bind(this));
 		
-		var grid = new responsiveGrid($('#grid')[0], {
+		this.grid = new responsiveGrid($('#grid')[0], {
 			col: 48,
-			width:$('#stage').innerWidth(),
-			height:$('#stage').innerHeight()
+			stage:$('#stage')
 		})
-		grid.draw();
+		this.grid.draw();
 		
-		checkSprite.call(this, {x:grid.offset, y:'Infinity', range:(grid.offset / 2) });
+		checkSprite.call(this, {x:this.grid.offset, y:'Infinity', range:(this.grid.offset / 2) });
 		this.setKeyFrame(1);
 	};
 	

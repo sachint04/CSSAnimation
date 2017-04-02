@@ -18,18 +18,19 @@ define([
 		this.context	= this.canvas.getContext('2d');
 		this.config		= _config;
 		this.draw 		= this.draw.bind(this);
+		this.refresh 	= this.refresh.bind(this);
 		this.offset;
 	}
 	
 	responsiveGrid.prototype.draw = function(){
-
-		this.canvas.width		= this.config.width;
-		this.canvas.height 	= this.config.height;
-		this.context.clearRect(0,0, this.config.width, this.config.height);
+		
+		this.canvas.width		= this.config.stage.width();
+		this.canvas.height 		= this.config.stage.height();
+		this.context.clearRect(0,0, this.config.stage.width(), this.config.stage.height());
 		
 		var col = this.config.col,
-		height	= this.config.height,
-		width	= this.config.width;
+		height	= this.config.stage.height(),
+		width	= this.config.stage.width();
 		
 		this.offset	= width / Number(col);
 		this.context.strokeStyle = 'rgb(155,155,155)';
@@ -41,8 +42,33 @@ define([
 			this.context.lineTo(noffset, height);
 			this.context.stroke();				
 		}
+		
+		var obj 	= checkPadding.call(this),
+		$canvas = $(this.canvas);
+		$canvas.css('left', obj.left);
+		$canvas.css('top', obj.top);
 	}
 	
+	responsiveGrid.prototype.refresh = function(_stage){
+		this.draw();
+		var obj 	= checkPadding.call(this),
+		$canvas = $(this.canvas);
+		$canvas.css('left', obj.left);
+		$canvas.css('top', obj.top);
+		
+	};
+	
+	function checkPadding(){
+		var $canvas = $(this.canvas),
+		_stage		= this.config.stage,
+		left 		= parseInt(_stage.css('left'), 10) || 0,
+		pLeft		= parseInt(_stage.css('padding-left'), 10),
+		top 		= parseInt(_stage.css('top'), 10) || 0,
+		pTop		= parseInt(_stage.css('padding-top'), 10),
+		cssLeft		= (left 	+ pLeft) +'px',
+		cssTop		= (top 		+ pTop) +'px';
+		return {left : cssLeft, top:cssTop};
+	}
 	
 	
 	return responsiveGrid
