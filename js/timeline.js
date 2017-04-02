@@ -12,7 +12,7 @@ define([
 	function($, EventDispatcher,Sprite, responsiveGrid, stage){
 	var 	time 			= 10,
 			fps				= 20, 
-			currentframe 	= 1, playInterval, aSprites, currentSprite, $playhead,$frame, $view,oEffect,$stage;
+			currentframe 	= 1, playInterval,  currentSprite, $playhead,$frame, $view,oEffect,$stage;
 
 		/**
 		 * 
@@ -85,7 +85,6 @@ define([
 		var oScope 		= this;
 		var oSprite 	= Sprite;
 		var $sprite 	= $('.sprite');
-		var arr			= aSprites;
 		$sprite.each(function(index, elem){
 			var $elem 		= $(elem);
 			var sprite 		= new oSprite($elem, $stage, grid);
@@ -339,9 +338,9 @@ define([
 	};
 	
 	function getCurrentSpriteByView(elem){
-		for(var i = 0; i <aSprites.length;i++){
-			if(aSprites[i].$view[0] === elem){
-				return aSprites[i];
+		for(var i = 0; i <this.aSprites.length;i++){
+			if(this.aSprites[i].$view[0] === elem){
+				return this.aSprites[i];
 			}
 		};
 	};
