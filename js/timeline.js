@@ -6,9 +6,10 @@ define([
 		"jquery",
 		"EventDispatcher",
 		"sprite",
-		"moveBar"
+		"moveBar",
+		'responsiveGrid',
 		],
-	function($, EventDispatcher,Sprite, moveBar){
+	function($, EventDispatcher,Sprite, moveBar, responsiveGrid){
 	var 	time 			= 10,
 			fps				= 20, 
 			currentframe 	= 1, playInterval, aSprites, currentSprite, $playhead,$frame, $view,oEffect,$stage;
@@ -59,21 +60,29 @@ define([
 			var sEffect = $(e.currectTarget).attr('id'); 
 			oScope.addEffect.call(this, sEffect);
 		});
-		moveBar.addEventListener('drag_progress', dragProgress.bind(this));
-		checkSprite.call(this);
+		//moveBar.addEventListener('drag_progress', dragProgress.bind(this));
+		
+		var grid = new responsiveGrid($('#grid')[0], {
+			col: 48,
+			width:$('#stage').innerWidth(),
+			height:$('#stage').innerHeight()
+		})
+		grid.draw();
+		
+		checkSprite.call(this, {x:grid.offset, y:'Infinity', range:(grid.offset / 2) });
 		this.setKeyFrame(1);
 	};
 	
-	function checkSprite(){
+	function checkSprite(grid){
 		var oScope 		= this;
 		var oSprite 	= Sprite;
 		var $sprite 	= $('.sprite');
 		var arr			= aSprites;
 		$sprite.each(function(index, elem){
 			var $elem 		= $(elem);
-			var sprite 		= new oSprite($elem, $stage);
+			var sprite 		= new oSprite($elem, $stage, grid);
 			sprite.addEventListener('sprite_click', onSpriteClick.bind(oScope));
-			sprite.addEventListener('ondrag', onDrag.bind(oScope));
+			//sprite.addEventListener('ondrag', onDrag.bind(oScope));
 			sprite.init();
 			aSprites.push(sprite);
 		});
@@ -167,7 +176,7 @@ define([
 			oScope.setCurrentFrame(curfrm + 1);
 		}.bind(oScope), Math.ceil(1000/fps));
 		
-		sprite.showControls(false);
+		//sprite.showControls(false);
 		createAnimation.call(this);
 	};
 	
@@ -225,7 +234,7 @@ define([
 		if(bKey){
 			updateCSS.call(this,obj);
 		}
-		moveBar.setTarget(obj.$view)
+		// moveBar.setTarget(obj.$view)
 	};
 	
 	/**
@@ -330,7 +339,7 @@ define([
 	};
 	function onSpriteClick(e){
 		this.currentSprite = getCurrentSpriteByView.call(this, e.target)
-		moveBar.setTarget(e.view);
+		//moveBar.setTarget(e.view);
 		var offset = e.view.offset();
 	};
 

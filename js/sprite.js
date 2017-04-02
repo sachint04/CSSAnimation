@@ -4,21 +4,21 @@
  */
 define([
 		"jquery",
-		"EventDispatcher",
+		"draggable",
 		"jqueryui",
 		"punch",
 		"touch"
 		],
 		
-	function($, EventDispatcher, jqueryui, punch, touch){
+	function($, draggable, jqueryui, punch, touch){
 		
 		/**
  		* Editable Sprite Controller
  		* @constructor
  		* @alias module:sprite
 		*/
-		var sprite = function(p_view, p_container){
-			EventDispatcher.call(this);
+		var sprite = function(p_view, p_container, _grid){
+			draggable.call(this, p_view, p_container,_grid);
 			/** The class '$view' property - jQuery element */
 			this.$view 			= p_view;
 			/** The class '$conainer' property - jQuery element */
@@ -27,7 +27,7 @@ define([
 			this.offset 		= this.$view.offset();
 			this.offset.width 	= this.$view.width();
 			this.offset.height 	= this.$view.height();
-			createScaleBar.call(this, this.offset, 'scalebar', this.$view, this.$container);
+			//createScaleBar.call(this, this.offset, 'scalebar', this.$view, this.$container);
 			
 			var oScope = this;
 			this.$view.click(function(e){
@@ -37,7 +37,7 @@ define([
 			return this;
 		};
 
-	sprite.prototype										= Object.create(EventDispatcher.prototype);
+	sprite.prototype										= Object.create(draggable.prototype);
 	sprite.prototype.constructor							= sprite;
 	
 	/**
@@ -52,7 +52,7 @@ define([
 	 * Initialize sprite controller 
 	 */
 	sprite.prototype.init 		= function(){
-			onDragStop.call(this, this.$view);		
+			//onDragStop.call(this, this.$view);		
 	};
 	
 	/** 
@@ -104,12 +104,12 @@ define([
  * @param {Object} dragFun
 	 */
 	function setDrag(bar, dragStartFun, dragStopFun, dragFun){
-		bar.draggable({
-			start:dragStartFun.bind(this),
-			stop:dragStopFun.bind(this),
-			cursor:'move',
-			drag:dragFun
-		});
+		// bar.draggable({
+			// start:dragStartFun.bind(this),
+			// stop:dragStopFun.bind(this),
+			// cursor:'move',
+			// drag:dragFun
+		// });
 		
 	};
 	
@@ -126,7 +126,7 @@ define([
 			'left':offset1.left,
 			'top':offset1.top
 			});		
-		console.log('onDragMove '+ JSON.stringify(offset1));
+		//console.log('onDragMove '+ JSON.stringify(offset1));
 		// $elem.css({
 			// 'left':(-($elem.width()/2))+'px',
 			// 'top':(-($elem.width()/2))+'px'
@@ -256,7 +256,7 @@ define([
 			offset			= $elem.offset();
 			
 			$elem.attr('data-target',$elem.parent().attr('id'));
-			console.log('onDragMoveStart - '+ JSON.stringify(offset));
+		//	console.log('onDragMoveStart - '+ JSON.stringify(offset));
 			$elem.appendTo($stage)
 			$elem.css(
 				{

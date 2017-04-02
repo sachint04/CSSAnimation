@@ -16,10 +16,69 @@
 		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
 		<link rel="shortcut icon" href="/favicon.ico" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<style type="text/css" media="screen">
+			#title{
+				width:200px;
+				height:200px;
+				border:1px solid red;
+				position:relative;
+			}
+		</style>
 	</head>
 
-	<body>
-		<h1>Hello Mayank!</h1>
-		</div>
+	<body onload="init()">
+		<div id="title">Hello Mayank!</div>
+		<script src="js/libs/interact-mini-1-2-6.js" type="text/javascript" charset="utf-8"></script>
 	</body>
+	<script type="text/javascript" charset="utf-8">
+		function init(){
+			
+			var element = document.getElementById('title');
+			var gridTarget = interact.createSnapGrid({
+			  x: 50, 
+			  y: 50, 
+			  range: 10,
+			 // offset: { x: 5, y: 10 }
+			});
+			interact(element)  
+			  .draggable({
+			    // enable inertial throwing
+			    inertia: true,
+			    // keep the element within the area of it's parent
+			    restrict: {
+			    // restriction: "parent",
+			     // endOnly: true,
+			      //elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+			    },
+			    // enable autoScroll
+			    autoScroll: true,
+			    // call this function on every dragmove event
+			    onmove: dragMoveListener,
+			    snap:{
+			    	targets:[   gridTarget]
+			    }
+			  });
+			
+			  function dragMoveListener (event) {
+			    console.log(event.type, event.pageX, event.pageY);
+			    var target = event.target,
+			        // keep the dragged position in the data-x/data-y attributes
+			        x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+			        y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+			
+			    // translate the element
+//			    target.style.webkitTransform =
+			    // target.style.transform =
+			      // 'translate(' + x + 'px, ' + y + 'px)';
+			
+			target.style.left = x+'px';
+			target.style.top = y+'px';
+				
+			    // update the posiion attributes
+			    target.setAttribute('data-x', x);
+			    target.setAttribute('data-y', y);
+			  }
+		};
+
+	</script>
 </html>

@@ -21,8 +21,8 @@ require.config({
         jquery				: 'libs/jquery-1.10.2',
            'jqueryui' 			: 'libs/jquery-ui-1.11.3.min',
         'punch'				: 'libs/jquery.ui.touch-punch.min',
-        'touch'				: 'libs/jqueryui_touch'
-        
+        'touch'				: 'libs/jqueryui_touch',
+        'interact'			: 'libs/interact-mini-1-2-6'
     }
 });
 
@@ -59,7 +59,7 @@ define([
 			}
 			
 			timeline.init(timeline, obj);
-			moveBar.init($('.stage'))
+		//	moveBar.init($('.stage'))
 			//timeline.play();
 				
 			
