@@ -41,14 +41,14 @@ define([
 	 */
 	timeline.prototype.init = function(timeline,  oJson){
 		var oScope 		= this;
-		aSprites 		= [];
 		time 			=	oJson.timesec || 30;
 		fps				= 	oJson.fps || 25;
 		currentframe	=	oJson.currentframe || 1;
 		createtimeline.call(this);	
 		$stage 			= $('.stage');
-		
 		effect = oEffect;
+		
+		this.aSprites 		= [];
 		this.setCurrentFrame(currentframe);
 		
 		var oScope = this;
@@ -56,6 +56,9 @@ define([
 		this.stage 	= new stage($stage);
 		this.stage.addEventListener('style_change', function(event){
 			oScope.grid.refresh(event.stage);
+			for (var i=0; i < oScope.aSprites.length; i++) {
+			  oScope.aSprites[i].refresh({x:oScope.grid.offset, y:'Infinity', range:(oScope.grid.offset / 2) });
+			};
 		});
 		
 		$('.timeline-cntrl a' ).click(function(e){
@@ -89,7 +92,7 @@ define([
 			sprite.addEventListener('sprite_click', onSpriteClick.bind(oScope));
 			//sprite.addEventListener('ondrag', onDrag.bind(oScope));
 			sprite.init();
-			aSprites.push(sprite);
+			oScope.aSprites.push(sprite);
 		});
 	};
 	

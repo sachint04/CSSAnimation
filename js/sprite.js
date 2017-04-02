@@ -52,6 +52,7 @@ define([
 	 * Initialize sprite controller 
 	 */
 	sprite.prototype.init 		= function(){
+		draggable.prototype.init.call(this)
 			//onDragStop.call(this, this.$view);		
 	};
 	
