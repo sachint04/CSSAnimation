@@ -7,9 +7,10 @@ define([
 		"EventDispatcher",
 		"sprite",
 		'responsiveGrid',
+		'contextmenu',
 		'stage'
 		],
-	function($, EventDispatcher,Sprite, responsiveGrid, stage){
+	function($, EventDispatcher,Sprite, responsiveGrid, contextmenu, stage){
 	var 	time 			= 10,
 			fps				= 20, 
 			currentframe 	= 1, playInterval,  currentSprite, $playhead,$frame, $view,oEffect,$stage;
@@ -79,6 +80,23 @@ define([
 		
 		checkSprite.call(this, {x:this.grid.offset, y:'Infinity', range:(this.grid.offset / 2) });
 		this.setKeyFrame(1);
+		document.getElementById('stage').oncontextmenu = function(e){
+			 e.preventDefault();
+			onContextMenu.call(oScope, e);
+		};
+		contextmenu.addEventListener('CONTEXT_SHOW', onInsert.bind(this));
+		$stage.click(function(e){
+			$('#contextmenu').addClass('hide');
+		});
+		
+	};
+	
+	function createSprite($elem){
+		var oScope 		= this;
+		var sprite 		= new Sprite($elem, $stage, {x:this.grid.offset, y:'Infinity', range:(this.grid.offset / 2) });
+		sprite.addEventListener('sprite_click', onSpriteClick.bind(oScope));
+		sprite.init();
+		this.aSprites.push(sprite)
 	};
 	
 	function checkSprite(grid){
@@ -87,11 +105,12 @@ define([
 		var $sprite 	= $('.sprite');
 		$sprite.each(function(index, elem){
 			var $elem 		= $(elem);
-			var sprite 		= new oSprite($elem, $stage, grid);
-			sprite.addEventListener('sprite_click', onSpriteClick.bind(oScope));
-			//sprite.addEventListener('ondrag', onDrag.bind(oScope));
-			sprite.init();
-			oScope.aSprites.push(sprite);
+			createSprite.call(oScope, $elem);
+			// var sprite 		= new oSprite($elem, $stage, grid);
+			// sprite.addEventListener('sprite_click', onSpriteClick.bind(oScope));
+			// //sprite.addEventListener('ondrag', onDrag.bind(oScope));
+			// sprite.init();
+			// oScope.aSprites.push(sprite);
 		});
 	};
 	
@@ -241,8 +260,8 @@ define([
 		if(bKey){
 			updateCSS.call(this,obj);
 		}
-		// moveBar.setTarget(obj.$view)
-	};
+		// moveBar.setTarget(obj.$view)
+	};
 	
 	/**
 	 *  Update CSS props in 'oEffect' object
@@ -263,8 +282,8 @@ define([
 				css			: obj.css
 			};	
 			
-		// console.log(JSON.stringify(oEffect));				
-		 	
+		// console.log(JSON.stringify(oEffect));				
+		 	
 	};
 	
 	/**
@@ -337,6 +356,26 @@ define([
 		}
 	};
 	
+	function onInsert(e){
+		var $target 	= $(e.event.target);
+		var action 		= $target.attr('id').toLowerCase();
+		var $target,$elem;
+		var $elem 	= $('<div class="sprite"></div>')
+		switch(action){
+			case 'insertbefore' :
+				$elem.insertBefore(e.target);
+			break;
+			case 'insertafter' :
+				$elem.insertAfter(e.target);
+			break;
+			case 'insertinside' :
+				e.target.append($elem);
+			break;
+		}
+		createSprite.call(this, $elem);
+		contextmenu.hide();
+	};
+	
 	function getCurrentSpriteByView(elem){
 		for(var i = 0; i <this.aSprites.length;i++){
 			if(this.aSprites[i].$view[0] === elem){
@@ -354,6 +393,26 @@ define([
 		console.log(JSON.stringify(e.offset));
 		if(this.currentSprite){
 			this.currentSprite.$view.offset(e.offset)
+		}
+	};
+	
+	function isSprite(elem){
+		var result;
+		for (var i=0; i < this.aSprites.length; i++) {
+			result	= this.aSprites[i].isSprite(elem); 
+			  if(result){
+			  	return  result;
+			  }
+		};
+		return null;
+	};
+	
+	
+	function onContextMenu(e){
+		var target = isSprite.call(this,e.target);
+		if(target){
+			var $elem =	 $(target);
+			contextmenu.show.call(contextmenu, {x: e.pageX,  y:e.pageY}, $elem);
 		}
 	};
 	return timeline;

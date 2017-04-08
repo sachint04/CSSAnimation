@@ -244,6 +244,14 @@ define([
 		});
 	};
 	
+	sprite.prototype.isSprite			= function(elem){
+		var result 	=	(elem === this.$view[0] || this.$view.has($(elem)));
+		if(result){
+			return this.$view;
+		}
+		return null;
+	}
+	
 	function onDragScaleStart(e){
 		var $elem = $(e.target);	
 	};
@@ -279,7 +287,8 @@ define([
 			});			
 		}	
 	};
-
+	
+	
 
 	return sprite;
 
