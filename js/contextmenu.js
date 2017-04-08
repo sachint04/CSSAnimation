@@ -3,7 +3,7 @@ define([
 	'EventDispatcher'],
 	function($, EventDispatcher){
 	var $view;
-	var arr	= ['Instert Before', 'Insert After', 'Insert Inside'];
+	var arr	= ['Insert Before', 'Insert After', 'Insert Inside'];
 	var __instance;
 	
 	var contextmenu = function(){

@@ -245,7 +245,10 @@ define([
 	};
 	
 	sprite.prototype.isSprite			= function(elem){
-		var result 	=	(elem === this.$view[0] || this.$view.has($(elem)));
+		var result 	= (elem === this.$view[0]);
+		if(!result){
+			result 	=		(this.$view.has($(elem))).length;
+		}
 		if(result){
 			return this.$view;
 		}
