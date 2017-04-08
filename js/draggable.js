@@ -54,9 +54,7 @@ define(
 			    inertia: true,
 			    // keep the element within the area of it's parent
 			    restrict: {
-			     restriction: '#stage',
-			      endOnly: true,
-			      elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+			     restriction: 'parent'
 			    },
 			    // enable autoScroll
 			   // autoScroll: true,
@@ -71,7 +69,10 @@ define(
 				 snap:{
 		    	
 			    	targets:[   gridTargetScale]
-			   },
+			   }, 
+			   restrict: {
+      				restriction: 'parent',
+    			},
 				   edges:{
 				   		right:true,
 				   		bottom:true,

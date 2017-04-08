@@ -372,7 +372,9 @@ define([
 				e.target.append($elem);
 			break;
 		}
-		createSprite.call(this, $elem);
+		var letters = ['red', 'blue', 'orange', 'gray', 'green', 'purple']
+		var color =  letters[Math.round(Math.random() * letters.length - 1) + 1];
+		createSprite.call(this, $elem.css('background',color));
 		contextmenu.hide();
 	};
 	
