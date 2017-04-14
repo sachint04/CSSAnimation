@@ -4,16 +4,12 @@
  */
 define([
 		"jquery",
-		"EventDispatcher",
-		"sprite",
-		'responsiveGrid',
-		'contextmenu',
-		'stage'
+		"EventDispatcher"
 		],
-	function($, EventDispatcher,Sprite, responsiveGrid, contextmenu, stage){
+	function($, EventDispatcher){
 	var 	time 			= 10,
 			fps				= 20, 
-			currentframe 	= 1, playInterval,  currentSprite, $playhead,$frame, $view,oEffect,$stage;
+			currentframe 	= 1, playInterval, sprite, $playhead,$frame, $view,oEffect;
 
 		/**
 		 * 
@@ -40,27 +36,18 @@ define([
 	 * @param {Object} p_sprite sprite controller object
 	 * @param {JSON} oJson timeline configuration
 	 */
-	timeline.prototype.init = function(timeline,  oJson){
+	timeline.prototype.init = function(timeline, p_sprite, oJson){
 		var oScope 		= this;
+		sprite 			= p_sprite;
 		time 			=	oJson.timesec || 30;
 		fps				= 	oJson.fps || 25;
 		currentframe	=	oJson.currentframe || 1;
 		createtimeline.call(this);	
-		$stage 			= $('.stage');
-		effect = oEffect;
 		
-		this.aSprites 		= [];
+		effect = oEffect;
 		this.setCurrentFrame(currentframe);
 		
-		var oScope = this;
-		
-		this.stage 	= new stage($stage);
-		this.stage.addEventListener('style_change', function(event){
-			oScope.grid.refresh(event.stage);
-			for (var i=0; i < oScope.aSprites.length; i++) {
-			  oScope.aSprites[i].refresh({x:oScope.grid.offset, y:'Infinity', range:(oScope.grid.offset / 2) });
-			};
-		});
+		sprite.addEventListener('ondrag', onDrag.bind(this));
 		
 		$('.timeline-cntrl a' ).click(function(e){
 			oScope.handleEvent.call(oScope, e);
@@ -70,48 +57,10 @@ define([
 			var sEffect = $(e.currectTarget).attr('id'); 
 			oScope.addEffect.call(this, sEffect);
 		});
-		//moveBar.addEventListener('drag_progress', dragProgress.bind(this));
 		
-		this.grid = new responsiveGrid($('#grid')[0], {
-			col: 48,
-			stage:$('#stage')
-		})
-		this.grid.draw();
-		
-		checkSprite.call(this, {x:this.grid.offset, y:'Infinity', range:(this.grid.offset / 2) });
 		this.setKeyFrame(1);
-		document.getElementById('stage').oncontextmenu = function(e){
-			 e.preventDefault();
-			onContextMenu.call(oScope, e);
-		};
-		contextmenu.addEventListener('CONTEXT_SHOW', onInsert.bind(this));
-		$stage.click(function(e){
-			$('#contextmenu').addClass('hide');
-		});
-		
-	};
-	
-	function createSprite($elem){
-		var oScope 		= this;
-		var sprite 		= new Sprite($elem, $stage, {x:this.grid.offset, y:'Infinity', range:(this.grid.offset / 2) });
-		sprite.addEventListener('sprite_click', onSpriteClick.bind(oScope));
 		sprite.init();
-		this.aSprites.push(sprite)
-	};
-	
-	function checkSprite(grid){
-		var oScope 		= this;
-		var oSprite 	= Sprite;
-		var $sprite 	= $('.sprite');
-		$sprite.each(function(index, elem){
-			var $elem 		= $(elem);
-			createSprite.call(oScope, $elem);
-			// var sprite 		= new oSprite($elem, $stage, grid);
-			// sprite.addEventListener('sprite_click', onSpriteClick.bind(oScope));
-			// //sprite.addEventListener('ondrag', onDrag.bind(oScope));
-			// sprite.init();
-			// oScope.aSprites.push(sprite);
-		});
+
 	};
 	
 	/**
@@ -202,7 +151,7 @@ define([
 			oScope.setCurrentFrame(curfrm + 1);
 		}.bind(oScope), Math.ceil(1000/fps));
 		
-		//sprite.showControls(false);
+		sprite.showControls(false);
 		createAnimation.call(this);
 	};
 	
@@ -214,10 +163,8 @@ define([
 			clearInterval(playInterval);
 			playInterval = null;
 		};
-		if(this.currentSprite){
-			this.currentSprite.showControls(true);
-			this.currentSprite.invalidateControls(true);
-		}
+		sprite.showControls(true);
+		sprite.invalidateControls(true);
 		clearAnimation.call(this);
 	};
 	
@@ -260,8 +207,7 @@ define([
 		if(bKey){
 			updateCSS.call(this,obj);
 		}
-		// moveBar.setTarget(obj.$view)
-	};
+	};
 	
 	/**
 	 *  Update CSS props in 'oEffect' object
@@ -282,8 +228,8 @@ define([
 				css			: obj.css
 			};	
 			
-		// console.log(JSON.stringify(oEffect));				
-		 	
+		// console.log(JSON.stringify(oEffect));				
+		 	
 	};
 	
 	/**
@@ -356,67 +302,8 @@ define([
 		}
 	};
 	
-	function onInsert(e){
-		var $target 	= $(e.event.target);
-		var action 		= $target.attr('id').toLowerCase();
-		var $target,$elem;
-		var $elem 	= $('<div class="sprite"></div>')
-		switch(action){
-			case 'insertbefore' :
-				$elem.insertBefore(e.target);
-			break;
-			case 'insertafter' :
-				$elem.insertAfter(e.target);
-			break;
-			case 'insertinside' :
-				e.target.append($elem);
-			break;
-		}
-		var letters = ['red', 'blue', 'orange', 'gray', 'green', 'purple']
-		var color =  letters[Math.round(Math.random() * letters.length - 1) + 1];
-		createSprite.call(this, $elem.css('background',color));
-		contextmenu.hide();
-	};
 	
-	function getCurrentSpriteByView(elem){
-		for(var i = 0; i <this.aSprites.length;i++){
-			if(this.aSprites[i].$view[0] === elem){
-				return this.aSprites[i];
-			}
-		};
-	};
-	function onSpriteClick(e){
-		this.currentSprite = getCurrentSpriteByView.call(this, e.target)
-		//moveBar.setTarget(e.view);
-		var offset = e.view.offset();
-	};
 
-	function dragProgress(e){
-		console.log(JSON.stringify(e.offset));
-		if(this.currentSprite){
-			this.currentSprite.$view.offset(e.offset)
-		}
-	};
-	
-	function isSprite(elem){
-		var result;
-		for (var i=0; i < this.aSprites.length; i++) {
-			result	= this.aSprites[i].isSprite(elem); 
-			  if(result){
-			  	return  result;
-			  }
-		};
-		return null;
-	};
-	
-	
-	function onContextMenu(e){
-		var target = isSprite.call(this,e.target);
-		if(target){
-			var $elem =	 $(target);
-			contextmenu.show.call(contextmenu, {x: e.pageX,  y:e.pageY}, $elem);
-		}
-	};
 	return timeline;
 
 });

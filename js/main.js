@@ -21,8 +21,8 @@ require.config({
         jquery				: 'libs/jquery-1.10.2',
            'jqueryui' 			: 'libs/jquery-ui-1.11.3.min',
         'punch'				: 'libs/jquery.ui.touch-punch.min',
-        'touch'				: 'libs/jqueryui_touch',
-        'interact'			: 'libs/interact-mini-1-2-6'
+        'touch'				: 'libs/jqueryui_touch'
+        
     }
 });
 
@@ -47,19 +47,17 @@ if (typeof Object.create !== 'function') {
 define([
 		"jquery",
 		"timeline",
-		"sprite",
-		"moveBar"
+		"sprite"
 		],
-		function($, Timeline, sprite, moveBar){
+		function($, Timeline, sprite){
 			var timeline = new Timeline($(".timlineview")); 
 			var obj = {
 				timesec: 8,
 				fps: 25,
 				currentframe:1
 			}
-			
-			timeline.init(timeline, obj);
-		//	moveBar.init($('.stage'))
+			var sprite 		= new sprite($('.sprite'))
+			timeline.init(timeline, sprite, obj);
 			//timeline.play();
 				
 			

@@ -4,21 +4,21 @@
  */
 define([
 		"jquery",
-		"draggable",
+		"EventDispatcher",
 		"jqueryui",
 		"punch",
 		"touch"
 		],
 		
-	function($, draggable, jqueryui, punch, touch){
+	function($, EventDispatcher, jqueryui, punch, touch){
 		
 		/**
  		* Editable Sprite Controller
  		* @constructor
  		* @alias module:sprite
 		*/
-		var sprite = function(p_view, p_container, _grid){
-			draggable.call(this, p_view, p_container,_grid);
+		var sprite = function(p_view, p_container){
+			EventDispatcher.call(this);
 			/** The class '$view' property - jQuery element */
 			this.$view 			= p_view;
 			/** The class '$conainer' property - jQuery element */
@@ -27,17 +27,12 @@ define([
 			this.offset 		= this.$view.offset();
 			this.offset.width 	= this.$view.width();
 			this.offset.height 	= this.$view.height();
-			//createScaleBar.call(this, this.offset, 'scalebar', this.$view, this.$container);
-			
-			var oScope = this;
-			this.$view.click(function(e){
-				oScope.dispatchEvent('sprite_click',{type:'sprite_click', target:this, view:oScope.$view});
-			})
-			//createMoveBar.call(this, this.offset, 'headermove', this.$view, this.$container );
+			createScaleBar.call(this, this.offset, 'scalebar', this.$view, this.$container);
+			createMoveBar.call(this, this.offset, 'headermove', this.$view, this.$container );
 			return this;
 		};
 
-	sprite.prototype										= Object.create(draggable.prototype);
+	sprite.prototype										= Object.create(EventDispatcher.prototype);
 	sprite.prototype.constructor							= sprite;
 	
 	/**
@@ -52,8 +47,7 @@ define([
 	 * Initialize sprite controller 
 	 */
 	sprite.prototype.init 		= function(){
-		draggable.prototype.init.call(this)
-			//onDragStop.call(this, this.$view);		
+			onDragStop.call(this, this.$view);		
 	};
 	
 	/** 
@@ -71,7 +65,7 @@ define([
 			'top': (offset.height - (bar.height()/2))+'px'
 		}).html('1');
 		view.append(bar);
-		setDrag.call(this, bar, onDragScaleStart, onDragScaleStop, onDragScale.bind(this));
+		setDrag.call(this, bar, onDragScale.bind(this));
 	
 		return bar;
 	}
@@ -93,7 +87,7 @@ define([
 			'top': (-(bar.height()/2))+'px'
 		}).html('0');
 		view.append(bar);
-		setDrag.call(this, bar, onDragMoveStart, onDragMoveStop, onDragMove.bind(this) );
+		setDrag.call(this, bar, onDragMove.bind(this) );
 		
 		return bar;
 		
@@ -104,13 +98,13 @@ define([
  * @param {Object} bar
  * @param {Object} dragFun
 	 */
-	function setDrag(bar, dragStartFun, dragStopFun, dragFun){
-		// bar.draggable({
-			// start:dragStartFun.bind(this),
-			// stop:dragStopFun.bind(this),
-			// cursor:'move',
-			// drag:dragFun
-		// });
+	function setDrag(bar, dragFun){
+		bar.draggable({
+			start:onDragStart.bind(this),
+			stop:onDragStop.bind(this),
+			cursor:'move',
+			drag:dragFun
+		});
 		
 	};
 	
@@ -118,20 +112,26 @@ define([
 	 * Private: Drag handler for Offset handler 
 	 */
 	function onDragMove(e){
-		var $elem 		= $(e.target),
-		sTarget 	= $elem.attr('data-target');
-		$target 	= $('#'+sTarget),
+		$elem 		= $(e.target),
+		$target 	= $elem.parent(),
 		offset1		= $elem.offset();
+		position1	= $elem.position();
+		offset2		= $target.offset(),
+		position2	= $target.position(),
 		
 		$target.offset({
 			'left':offset1.left,
 			'top':offset1.top
-			});		
-		//console.log('onDragMove '+ JSON.stringify(offset1));
-		// $elem.css({
-			// 'left':(-($elem.width()/2))+'px',
-			// 'top':(-($elem.width()/2))+'px'
-			// });
+			});
+// 
+			// 'left':offset1.left+'px',
+			// 'top': offset1.top +'px'
+		//});
+		console.log('movebar '+ JSON.stringify(position1));
+		$elem.css({
+			'left':(-($elem.width()/2))+'px',
+			'top':(-($elem.width()/2))+'px'
+			});
 	
 		
 	}
@@ -144,15 +144,9 @@ define([
 		$target 		= $scalebar.parent();
 		
 		$target.css({
-			'width': ($scalebar.position().left)+'px', 
-			'height': ($scalebar.position().top)+'px' 
+			'width': ($scalebar.position().left - $target.position().left)+'px', 
+			'height': ($scalebar.position().top - $target.position().top)+'px' 
 		});
-		this.dispatchEvent('ondrag',{type:'ondrag', target:this, css:{
-						"left":this.$view.css('left'), 
-						"top":this.$view.css('top'), 
-						"width":this.$view.css('width'), 
-						"height":this.$view.css('height')
-						}, $view:$target});		
 	//	console.log($target.attr('data-target')+' | '+$target.offset().top+' | '+$target.offset().left);
 	}
 	
@@ -169,7 +163,7 @@ define([
 	 * @param {Object} e Drag data
 	 */
 	function onDragStop(e){
-		this.dispatchEvent('ondrag_stop',{type:'ondrag_stop', target:this, css:{
+		this.dispatchEvent('ondrag',{type:'ondrag', target:this, css:{
 						"left":this.$view.css('left'), 
 						"top":this.$view.css('top'), 
 						"width":this.$view.css('width'), 
@@ -244,54 +238,7 @@ define([
 		});
 	};
 	
-	sprite.prototype.isSprite			= function(elem){
-		var result 	= (elem === this.$view[0]);
-		if(!result){
-			result 	=		(this.$view.has($(elem))).length;
-		}
-		if(result){
-			return this.$view;
-		}
-		return null;
-	}
-	
-	function onDragScaleStart(e){
-		var $elem = $(e.target);	
-	};
-	function onDragScaleStop(e){
-		var $elem = $(e.target);	
-	};
-	function onDragMoveStart(e){
-		var $elem = $(e.target);
-		if(!$elem.parent().hasClass('stage') ){
-			var $stage		= $('.stage'),
-			offset			= $elem.offset();
-			
-			$elem.attr('data-target',$elem.parent().attr('id'));
-		//	console.log('onDragMoveStart - '+ JSON.stringify(offset));
-			$elem.appendTo($stage)
-			$elem.css(
-				{
-				'left':offset.left,	
-				'top':offset.top	
-			});			
-		}	
-	};
-	
-	function onDragMoveStop(e){
-		var $elem = $(e.target);
-		if($elem.parent().hasClass('stage') ){
-			console.log('onDragMoveStop - '+ JSON.stringify($elem.offset()));
-			var $target		= $('#'+$elem.attr('data-target'));
-			$elem.appendTo($target);
-			$elem.css({
-				'left':'0px',
-				'top': '0px'
-			});			
-		}	
-	};
-	
-	
+
 
 	return sprite;
 
