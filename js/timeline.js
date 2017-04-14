@@ -302,6 +302,28 @@ define([
 		}
 	};
 	
+<<<<<<< HEAD
+=======
+	function onInsert(e){
+		var $target 	= $(e.event.target);
+		var action 		= $target.attr('id').toLowerCase();
+		var $target,$elem;
+		var $elem 	= $('<div class="sprite"></div>')
+		switch(action){
+			case 'insertbefore' :
+				$elem.insertBefore(e.target);
+			break;
+			case 'insertafter' :
+				$elem.insertAfter(e.target);
+			break;
+			case 'insertinside' :
+				e.target.append($elem);
+			break;
+		}
+		createSprite.call(this, $elem);
+		contextmenu.hide();
+	};
+>>>>>>> parent of 5807db4... update
 	
 
 	return timeline;
