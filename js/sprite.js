@@ -238,7 +238,55 @@ define([
 		});
 	};
 	
+<<<<<<< HEAD
 
+=======
+	sprite.prototype.isSprite			= function(elem){
+		var result 	=	(elem === this.$view[0] || this.$view.has($(elem)));
+		if(result){
+			return this.$view;
+		}
+		return null;
+	}
+	
+	function onDragScaleStart(e){
+		var $elem = $(e.target);	
+	};
+	function onDragScaleStop(e){
+		var $elem = $(e.target);	
+	};
+	function onDragMoveStart(e){
+		var $elem = $(e.target);
+		if(!$elem.parent().hasClass('stage') ){
+			var $stage		= $('.stage'),
+			offset			= $elem.offset();
+			
+			$elem.attr('data-target',$elem.parent().attr('id'));
+		//	console.log('onDragMoveStart - '+ JSON.stringify(offset));
+			$elem.appendTo($stage)
+			$elem.css(
+				{
+				'left':offset.left,	
+				'top':offset.top	
+			});			
+		}	
+	};
+	
+	function onDragMoveStop(e){
+		var $elem = $(e.target);
+		if($elem.parent().hasClass('stage') ){
+			console.log('onDragMoveStop - '+ JSON.stringify($elem.offset()));
+			var $target		= $('#'+$elem.attr('data-target'));
+			$elem.appendTo($target);
+			$elem.css({
+				'left':'0px',
+				'top': '0px'
+			});			
+		}	
+	};
+	
+	
+>>>>>>> parent of b4f35b5... update
 
 	return sprite;
 
