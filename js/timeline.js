@@ -339,9 +339,9 @@ define([
 	};
 	
 	function getCurrentSpriteByView(elem){
-		for(var i = 0; i <aSprites.length;i++){
-			if(aSprites[i].$view[0] === elem){
-				return aSprites[i];
+		for(var i = 0; i <this.aSprites.length;i++){
+			if(this.aSprites[i].$view[0] === elem){
+				return this.aSprites[i];
 			}
 		};
 	};
